@@ -1,0 +1,9 @@
+{
+  "name": "@dudasaus/discord-hono",
+  "exports": "./index.ts",
+  "imports": {
+    "@hono/hono": "jsr:@hono/hono@^4.7.4",
+    "discord-api-types": "npm:discord-api-types@^0.37.119",
+    "tweetnacl": "npm:tweetnacl@^1.0.3"
+  }
+}

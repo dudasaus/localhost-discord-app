@@ -2,12 +2,16 @@
   "version": "4",
   "specifiers": {
     "jsr:@hono/hono@^4.7.4": "4.7.4",
+    "jsr:@std/dotenv@~0.225.3": "0.225.3",
     "npm:discord-api-types@~0.37.119": "0.37.119",
     "npm:tweetnacl@^1.0.3": "1.0.3"
   },
   "jsr": {
     "@hono/hono@4.7.4": {
       "integrity": "c03c9cbe0fbfc4e51f3fee6502a7903aa4f9ef7c2c98635607b15eee14258825"
+    },
+    "@std/dotenv@0.225.3": {
+      "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
     }
   },
   "npm": {
@@ -20,7 +24,8 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono@^4.7.4"
+      "jsr:@hono/hono@^4.7.4",
+      "jsr:@std/dotenv@~0.225.3"
     ],
     "members": {
       "discord-hono": {

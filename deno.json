@@ -1,9 +1,10 @@
 {
   "tasks": {
-    "dev": "deno run --allow-net --allow-env --watch src/main.ts"
+    "dev": "deno run --allow-net --allow-env --allow-read --watch src/main.ts"
   },
   "imports": {
-    "@hono/hono": "jsr:@hono/hono@^4.7.4"
+    "@hono/hono": "jsr:@hono/hono@^4.7.4",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.3"
   },
   "workspace": [
     "discord-hono"

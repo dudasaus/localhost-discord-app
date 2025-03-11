@@ -4,7 +4,7 @@ import {
   InteractionResponseType,
   InteractionType,
 } from "discord-api-types/v10";
-import { verifySignature } from "./verify.ts";
+import { verifyKey } from "discord-interactions";
 
 type Handler = () => Promise<string> | string;
 
@@ -120,17 +120,20 @@ export class DiscordHono<T> {
         return c.body("Timestamp not found", 401);
       }
       const publicKey = this.discordPublicKey;
+      const verified = await verifyKey(
+        rawBody,
+        signature,
+        timestamp,
+        publicKey,
+      );
       if (
-        !verifySignature({
-          publicKey,
-          signature,
-          timestamp,
-          rawBody,
-        })
+        !verified
       ) {
         console.error("Failed to verify", {
           publicKey,
           signature,
+          timestamp,
+          rawBody,
         });
         return c.body("Unable to verify", 401);
       }

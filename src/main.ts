@@ -40,4 +40,5 @@ if (flags.register) {
   console.log(response.status, await response.json());
 } else {
   Deno.serve(app.fetch);
+  console.log("App start");
 }

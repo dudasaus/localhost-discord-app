@@ -111,10 +111,12 @@ export class DiscordHono<T> {
       // Verify.
       const signature = c.req.header("x-signature-ed25519");
       if (!signature) {
+        console.error("Missing signature");
         return c.body("Signature not found", 401);
       }
       const timestamp = c.req.header("x-signature-timestamp");
       if (!timestamp) {
+        console.error("Missing timestamp");
         return c.body("Timestamp not found", 401);
       }
       const publicKey = this.discordPublicKey;
@@ -126,6 +128,10 @@ export class DiscordHono<T> {
           rawBody,
         })
       ) {
+        console.error("Failed to verify", {
+          publicKey,
+          signature,
+        });
         return c.body("Unable to verify", 401);
       }
 

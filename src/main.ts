@@ -3,10 +3,16 @@ import { Hono } from "@hono/hono";
 import { DiscordHono } from "@dudasaus/discord-hono";
 
 const app = new Hono();
-const _discordApp = new DiscordHono(app);
+const discordApp = new DiscordHono(app);
+
+discordApp
+  .command("status", () => {
+    return "ok";
+  })
+  .register();
 
 app.get("/", (c) => {
-  return c.text("Hello world");
+  return c.json({ status: "ok" });
 });
 
 Deno.serve(app.fetch);

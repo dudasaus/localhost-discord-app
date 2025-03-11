@@ -20,12 +20,14 @@ function envOrThrow(key: string): string {
   return value;
 }
 
-export class DiscordHono<T> {
+export class DiscordHono {
   private handlersRegistered = false;
   private readonly commandHandlers = new Map<string, Handler>();
   private discordPublicKey: string;
   private discordAppId: string;
   private discordApiUrl: string;
+  private discordBotToken: string;
+  private discordChannelId: string;
   constructor(
     readonly app: Hono,
   ) {
@@ -33,6 +35,8 @@ export class DiscordHono<T> {
     this.discordAppId = envOrThrow("DISCORD_APP_ID");
     this.discordApiUrl = Deno.env.get("DISCORD_API_URL") ??
       "https://discord.com/api/v10";
+    this.discordBotToken = envOrThrow("DISCORD_BOT_TOKEN");
+    this.discordChannelId = envOrThrow("DISCORD_CHANNEL_ID");
   }
 
   command(name: string, handler: Handler): this {
@@ -150,5 +154,23 @@ export class DiscordHono<T> {
           return;
       }
     });
+  }
+
+  async message(content: string, channelId?: string) {
+    channelId = channelId ?? this.discordChannelId;
+    const response = await fetch(
+      `${this.discordApiUrl}/channels/${channelId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content,
+        }),
+      },
+    );
+    return await response.text();
   }
 }

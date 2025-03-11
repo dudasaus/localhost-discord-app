@@ -5,6 +5,7 @@ import { parseArgs } from "@std/cli/parse-args";
 
 const flags = parseArgs(Deno.args, {
   boolean: ["register"],
+  string: ["message"],
 });
 
 const app = new Hono();
@@ -18,6 +19,21 @@ discordApp
 
 app.get("/", (c) => {
   return c.json({ status: "ok" });
+});
+
+app.post("/message", async (c) => {
+  try {
+    const data = await c.req.json();
+    if (data.content && typeof data.content === "string") {
+      await discordApp.message(data.content);
+      return c.text("ok");
+    }
+    c.status(400);
+    return c.text("Content not found");
+  } catch (_e) {
+    c.status(400);
+    return c.text("Invalid JSON");
+  }
 });
 
 if (flags.register) {
@@ -38,6 +54,9 @@ if (flags.register) {
     },
   );
   console.log(response.status, await response.json());
+} else if (flags.message) {
+  const response = await discordApp.message(flags.message);
+  console.log(response);
 } else {
   Deno.serve(app.fetch);
   console.log("App start");

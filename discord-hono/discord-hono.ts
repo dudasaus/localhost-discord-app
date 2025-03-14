@@ -20,9 +20,7 @@ export class DiscordHono {
   private discordApiUrl: string;
   private discordBotToken: string;
   private discordChannelId: string;
-  constructor(
-    readonly app: Hono,
-  ) {
+  constructor() {
     this.discordPublicKey = envOrThrow("DISCORD_PUBLIC_KEY");
     this.discordAppId = envOrThrow("DISCORD_APP_ID");
     this.discordApiUrl = Deno.env.get("DISCORD_API_URL") ??
@@ -104,10 +102,11 @@ export class DiscordHono {
 
   /**
    * Starts listening for hono requests.
+   * Listens for POST requests at '/interactions'.
    */
-  listen() {
+  listen(app: Hono) {
     this.handlersRegistered = true;
-    this.app.post("/interactions", async (c) => {
+    app.post("/interactions", async (c) => {
       const rawBody = await c.req.text();
 
       // Verify.

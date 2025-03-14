@@ -9,7 +9,7 @@ const flags = parseArgs(Deno.args, {
 });
 
 const app = new Hono();
-const discordApp = new DiscordHono(app);
+const discordApp = new DiscordHono();
 
 discordApp
   .command(
@@ -46,7 +46,7 @@ if (flags.register) {
   const response = await discordApp.message(flags.message);
   console.log(response);
 } else {
-  discordApp.listen();
+  discordApp.listen(app);
   Deno.serve(app.fetch);
   console.log("App start");
 }

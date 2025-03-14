@@ -1,6 +1,6 @@
 import "@std/dotenv/load";
 import { Hono } from "@hono/hono";
-import { DiscordHono } from "@dudasaus/discord-hono";
+import { Command, DiscordHono } from "@dudasaus/discord-hono";
 import { parseArgs } from "@std/cli/parse-args";
 
 const flags = parseArgs(Deno.args, {
@@ -12,10 +12,13 @@ const app = new Hono();
 const discordApp = new DiscordHono(app);
 
 discordApp
-  .command("status", () => {
-    return "ok";
-  })
-  .register();
+  .command(
+    Command.create(
+      "status",
+      "Check the status of the Discord bot.",
+      () => "ok",
+    ),
+  );
 
 app.get("/", (c) => {
   return c.json({ status: "ok" });
@@ -37,27 +40,13 @@ app.post("/message", async (c) => {
 });
 
 if (flags.register) {
-  const response = await fetch(
-    `https://discord.com/api/v10/applications/${
-      Deno.env.get("DISCORD_APP_ID")
-    }/commands`,
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: "status",
-        description: "Check the status of the discord bot",
-      }),
-    },
-  );
-  console.log(response.status, await response.json());
+  const ok = await discordApp.registerCommands();
+  Deno.exit(ok ? 0 : 1);
 } else if (flags.message) {
   const response = await discordApp.message(flags.message);
   console.log(response);
 } else {
+  discordApp.listen();
   Deno.serve(app.fetch);
   console.log("App start");
 }

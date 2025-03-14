@@ -1,4 +1,5 @@
 import type { Context, Hono } from "@hono/hono";
+import type { CommandInterface } from "./command.ts";
 import { envOrThrow } from "@dudasaus/env-or-throw";
 import {
   type APIApplicationCommandInteraction,
@@ -7,15 +8,13 @@ import {
 } from "discord-api-types/v10";
 import { verifyKey } from "discord-interactions";
 
-type Handler = () => Promise<string> | string;
-
 function wait(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
 
 export class DiscordHono {
   private handlersRegistered = false;
-  private readonly commandHandlers = new Map<string, Handler>();
+  private readonly commands = new Map<string, CommandInterface>();
   private discordPublicKey: string;
   private discordAppId: string;
   private discordApiUrl: string;
@@ -32,11 +31,14 @@ export class DiscordHono {
     this.discordChannelId = envOrThrow("DISCORD_CHANNEL_ID");
   }
 
-  command(name: string, handler: Handler): this {
+  /**
+   * Register a slash command handler.
+   */
+  command(command: CommandInterface): this {
     if (this.handlersRegistered) {
       throw new Error("Handlers already registered.");
     }
-    this.commandHandlers.set(name, handler);
+    this.commands.set(command.name, command);
     return this;
   }
 
@@ -46,13 +48,13 @@ export class DiscordHono {
   ) {
     const commandName = body.data.name;
 
-    const handler = this.commandHandlers.get(commandName);
+    const foundCommand = this.commands.get(commandName);
 
-    if (!handler) {
-      return c.body("Command handler not found", 404);
+    if (!foundCommand) {
+      return c.body("Command not found", 404);
     }
 
-    const handlerResult = handler();
+    const handlerResult = foundCommand.handler();
     if (typeof handlerResult === "string") {
       return c.json({
         type: InteractionResponseType.ChannelMessageWithSource,
@@ -64,7 +66,7 @@ export class DiscordHono {
 
     // Start the late update.
     const lateUpdate = async () => {
-      const content = await handler();
+      const content = await handlerResult;
       const baseUrl = this.discordApiUrl;
       const updateRequest = new Request(
         `${baseUrl}/webhooks/${this.discordAppId}/${body.token}/messages/@original`,
@@ -100,7 +102,10 @@ export class DiscordHono {
     });
   }
 
-  register() {
+  /**
+   * Starts listening for hono requests.
+   */
+  listen() {
     this.handlersRegistered = true;
     this.app.post("/interactions", async (c) => {
       const rawBody = await c.req.text();
@@ -149,6 +154,9 @@ export class DiscordHono {
     });
   }
 
+  /**
+   * Send a message via Discord bot.
+   */
   async message(content: string, channelId?: string) {
     channelId = channelId ?? this.discordChannelId;
     const response = await fetch(
@@ -165,5 +173,40 @@ export class DiscordHono {
       },
     );
     return await response.text();
+  }
+
+  /**
+   * Register the commands with Discord.
+   * @returns success
+   */
+  async registerCommands(): Promise<boolean> {
+    let allOk = true;
+    for (const command of this.commands.values()) {
+      const response = await fetch(
+        `https://discord.com/api/v10/applications/${
+          Deno.env.get("DISCORD_APP_ID")
+        }/commands`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bot ${this.discordBotToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: command.name,
+            description: command.description,
+          }),
+        },
+      );
+
+      if (response.ok) {
+        console.log(`${command.name}: %cregistered`, "color: lime");
+      } else {
+        allOk = false;
+        console.error(`${command.name}: %cFailed to register`, "color: red");
+        console.error(await response.json());
+      }
+    }
+    return allOk;
   }
 }

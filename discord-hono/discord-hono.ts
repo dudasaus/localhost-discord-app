@@ -1,4 +1,5 @@
 import type { Context, Hono } from "@hono/hono";
+import { envOrThrow } from "@dudasaus/env-or-throw";
 import {
   type APIApplicationCommandInteraction,
   InteractionResponseType,
@@ -10,14 +11,6 @@ type Handler = () => Promise<string> | string;
 
 function wait(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
-}
-
-function envOrThrow(key: string): string {
-  const value = Deno.env.get(key);
-  if (!value) {
-    throw new Error(`Environment variable ${key} not found`);
-  }
-  return value;
 }
 
 export class DiscordHono {
@@ -163,7 +156,7 @@ export class DiscordHono {
       {
         method: "POST",
         headers: {
-          "Authorization": `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
+          "Authorization": `Bot ${this.discordBotToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

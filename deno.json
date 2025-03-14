@@ -5,6 +5,7 @@
     "register": "deno run --allow-net --allow-env --allow-read src/main.ts --register"
   },
   "imports": {
+    "@dudasaus/env-or-throw": "jsr:@dudasaus/env-or-throw@^1.0.0",
     "@hono/hono": "jsr:@hono/hono@^4.7.4",
     "@std/cli": "jsr:@std/cli@^1.0.14",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.3"

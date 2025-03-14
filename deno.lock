@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@dudasaus/env-or-throw@1": "1.0.0",
     "jsr:@hono/hono@^4.7.4": "4.7.4",
     "jsr:@std/cli@^1.0.14": "1.0.14",
     "jsr:@std/dotenv@~0.225.3": "0.225.3",
@@ -8,6 +9,9 @@
     "npm:discord-interactions@^4.1.1": "4.1.1"
   },
   "jsr": {
+    "@dudasaus/env-or-throw@1.0.0": {
+      "integrity": "3aed7f61666af3f5a2a11c3fff63ff8ff9a906570848b04ea1fab519e9a045b0"
+    },
     "@hono/hono@4.7.4": {
       "integrity": "c03c9cbe0fbfc4e51f3fee6502a7903aa4f9ef7c2c98635607b15eee14258825"
     },
@@ -28,6 +32,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@dudasaus/env-or-throw@1",
       "jsr:@hono/hono@^4.7.4",
       "jsr:@std/cli@^1.0.14",
       "jsr:@std/dotenv@~0.225.3"
